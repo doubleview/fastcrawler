@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- *
+ * this class represent the html data
+ * @author doubleview
  */
 public class HtmlData extends AbstractResponseData {
 
@@ -55,9 +56,20 @@ public class HtmlData extends AbstractResponseData {
     }
 
     public List<String> getAllLinks() {
-        PlainTextData plainTextData = (PlainTextData) css("a", "href");
-        return plainTextData.toStrings();
+        return getAllLinks(false);
     }
+
+    public List<String> getAllLinks(boolean isNotOnlyHref) {
+        PlainTextData hrefs = (PlainTextData) css("a", "href");
+        if (isNotOnlyHref) {
+            PlainTextData imgSrc = (PlainTextData) css("img", "src");
+            PlainTextData srciptSrc = (PlainTextData) css("script", "src");
+            PlainTextData cssSrc = (PlainTextData) css("link", "src");
+            hrefs.add(imgSrc).add(srciptSrc).add(cssSrc);
+        }
+        return hrefs.toStrings();
+    }
+
 
     public ResponseData css(String cssString) {
         return css(cssString, null);
@@ -76,11 +88,21 @@ public class HtmlData extends AbstractResponseData {
         }
     }
 
+
+    public ResponseData cssText(String cssString) {
+        HtmlData htmlData = (HtmlData) css(cssString, null);
+        List<String> resultStrings = new ArrayList<>();
+        for (Element element : getElements()) {
+            resultStrings.add(element.text());
+        }
+        return new PlainTextData(resultStrings);
+    }
+
     @Override
     protected List<String> toStrings() {
         List<String> resultStrings = new ArrayList<>();
         for (Element element : getElements()) {
-            resultStrings.add(element.text());
+            resultStrings.add(element.outerHtml());
         }
         return resultStrings;
     }

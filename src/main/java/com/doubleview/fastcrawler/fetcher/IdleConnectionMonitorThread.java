@@ -52,7 +52,7 @@ public class IdleConnectionMonitorThread extends Thread {
                 }
             }
         } catch (InterruptedException ignored) {
-            logger.warn(ignored.getMessage() , ignored);
+            logger.error(ignored.getMessage() , ignored);
         }
     }
 

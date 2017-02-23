@@ -4,6 +4,10 @@ package com.doubleview.fastcrawler.parser;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+/**
+ * this object represent the json text data
+ * @author doubleview
+ */
 public class JsonData extends PlainTextData{
 
 

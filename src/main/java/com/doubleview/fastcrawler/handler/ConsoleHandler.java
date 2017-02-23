@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-
+/**
+ * the result will be printed to the console
+ * @author  doubleview
+ */
 public class ConsoleHandler implements ResultHandler {
 
     private Logger logger = LoggerFactory.getLogger(getClass());

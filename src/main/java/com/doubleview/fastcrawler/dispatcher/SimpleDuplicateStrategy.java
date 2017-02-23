@@ -1,4 +1,4 @@
-package com.doubleview.fastcrawler.dispatch;
+package com.doubleview.fastcrawler.dispatcher;
 
 import com.doubleview.fastcrawler.CrawlerRequest;
 
@@ -7,14 +7,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ *
  * @author doubleview
  */
-public class HashSetDuplicateRemover implements DuplicateRemover {
+public class SimpleDuplicateStrategy implements DuplicateStrategy {
 
     private Set<String> urls = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     @Override
-    public boolean isDuplicate(CrawlerRequest request) {
+    public boolean isSeenBefore(CrawlerRequest request) {
         return !urls.add(getUrl(request));
     }
 
@@ -23,12 +24,12 @@ public class HashSetDuplicateRemover implements DuplicateRemover {
     }
 
     @Override
-    public void resetDuplicateCheck() {
+    public void resetCheck() {
         urls.clear();
     }
 
     @Override
-    public int getTotalRequestsCount() {
+    public int getSize() {
         return urls.size();
     }
 }

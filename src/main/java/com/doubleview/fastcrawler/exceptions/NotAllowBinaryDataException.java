@@ -1,7 +1,9 @@
 package com.doubleview.fastcrawler.exceptions;
 
 
-
+/**
+ * @author doubleview
+ */
 public class NotAllowBinaryDataException extends Exception{
 
     public NotAllowBinaryDataException() {

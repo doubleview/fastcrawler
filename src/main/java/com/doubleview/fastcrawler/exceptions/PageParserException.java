@@ -1,6 +1,8 @@
 package com.doubleview.fastcrawler.exceptions;
 
-
+/**
+ * @author doubleview
+ */
 public class PageParserException extends Exception{
 
 

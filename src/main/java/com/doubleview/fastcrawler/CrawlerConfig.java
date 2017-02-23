@@ -15,11 +15,11 @@ public class CrawlerConfig {
 
     private int retrySleepTime = 1000;
 
+    private String binaryStorePath;
+
     private int maxDepth= -1;
 
     private int maxPages = -1;
-
-    private String userAgent = "fastcrawler (https://github.com/doubleview/fastcrawler)";
 
     private int maxConnsPerHost = 100;
 
@@ -31,9 +31,13 @@ public class CrawlerConfig {
 
     private int fetchTimeDelay = 200;
 
-    private int maxDownloadSize = 1048576;
+    private int maxDownloadSize = 1*1024*1024;
+
+    private String userAgent = "fastcrawler (https://github.com/doubleview/fastcrawler)";
 
     private boolean followRedirects = true;
+
+    private boolean includeBinaryContent = false;
 
     private String proxyHost = null;
 
@@ -43,14 +47,22 @@ public class CrawlerConfig {
 
     private String proxyPassword = null;
 
-    private boolean includeBinaryContent = false;
-    
+
     public static CrawlerConfig custom(){
         return new CrawlerConfig();
     }
     
     public int getMaxDepth() {
         return maxDepth;
+    }
+
+    public String getBinaryStorePath() {
+        return binaryStorePath;
+    }
+
+    public CrawlerConfig setBinaryStorePath(String binaryStorePath) {
+        this.binaryStorePath = binaryStorePath;
+        return this;
     }
 
     public CrawlerConfig setMaxDepth(int maxDepth) {
@@ -172,40 +184,45 @@ public class CrawlerConfig {
         return retryTimes;
     }
 
-    public void setRetryTimes(int retryTimes) {
+    public CrawlerConfig setRetryTimes(int retryTimes) {
         this.retryTimes = retryTimes;
+        return this;
     }
 
     public int getCycleRetryTimes() {
         return cycleRetryTimes;
     }
 
-    public void setCycleRetryTimes(int cycleRetryTimes) {
+    public CrawlerConfig setCycleRetryTimes(int cycleRetryTimes) {
         this.cycleRetryTimes = cycleRetryTimes;
+        return this;
     }
 
     public int getRetrySleepTime() {
         return retrySleepTime;
     }
 
-    public void setRetrySleepTime(int retrySleepTime) {
+    public CrawlerConfig setRetrySleepTime(int retrySleepTime) {
         this.retrySleepTime = retrySleepTime;
+        return this;
     }
 
     public int getFetchTimeDelay() {
         return fetchTimeDelay;
     }
 
-    public void setFetchTimeDelay(int fetchTimeDelay) {
+    public CrawlerConfig setFetchTimeDelay(int fetchTimeDelay) {
         this.fetchTimeDelay = fetchTimeDelay;
+        return this;
     }
 
     public boolean isIncludeBinaryContent() {
         return includeBinaryContent;
     }
 
-    public void setIncludeBinaryContent(boolean includeBinaryContent) {
+    public CrawlerConfig setIncludeBinaryContent(boolean includeBinaryContent) {
         this.includeBinaryContent = includeBinaryContent;
+        return this;
     }
 
     @Override

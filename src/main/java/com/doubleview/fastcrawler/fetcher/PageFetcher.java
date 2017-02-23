@@ -6,7 +6,7 @@ import com.doubleview.fastcrawler.CrawlerRequest;
 import com.doubleview.fastcrawler.Page;
 import com.doubleview.fastcrawler.exceptions.ContentFetchException;
 import com.doubleview.fastcrawler.exceptions.PageSizeOverException;
-import com.doubleview.fastcrawler.utils.UrlUtils;
+import com.doubleview.fastcrawler.utils.NetUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
@@ -37,11 +37,12 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.concurrent.locks.ReentrantLock;
+
 /**
- *
- *
+ * the class will construct the httpclient and fetch the result the crawler request
+ * @author doubleview
  */
-public class PageFetcher extends CrawlerConfiguable{
+public class PageFetcher extends CrawlerConfiguable {
 
     protected static final Logger logger = LoggerFactory.getLogger(PageFetcher.class);
 
@@ -51,11 +52,11 @@ public class PageFetcher extends CrawlerConfiguable{
 
     protected CloseableHttpClient httpClient;
 
-    protected  IdleConnectionMonitorThread connectionMonitorThread = null;
+    protected IdleConnectionMonitorThread connectionMonitorThread = null;
 
-    protected  long lastFetchTime = 0;
+    protected long lastFetchTime = 0;
 
-    public PageFetcher(CrawlerConfig crawlerConfig){
+    public PageFetcher(CrawlerConfig crawlerConfig) {
         super(crawlerConfig);
         initHttpClient(crawlerConfig);
     }
@@ -63,9 +64,10 @@ public class PageFetcher extends CrawlerConfiguable{
 
     /**
      * init the httpclient
+     *
      * @param crawlerConfig
      */
-    private void initHttpClient(CrawlerConfig crawlerConfig){
+    private void initHttpClient(CrawlerConfig crawlerConfig) {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setExpectContinueEnabled(true)
                 .setCookieSpec(CookieSpecs.STANDARD)
@@ -74,7 +76,7 @@ public class PageFetcher extends CrawlerConfiguable{
                 .setConnectTimeout(crawlerConfig.getConnectionTimeout())
                 .build();
 
-        RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder  = RegistryBuilder.create();
+        RegistryBuilder<ConnectionSocketFactory> connRegistryBuilder = RegistryBuilder.create();
         connRegistryBuilder.register("http", PlainConnectionSocketFactory.INSTANCE);
         SSLConnectionSocketFactory sslConnectionSocketFactory = null;
         try {
@@ -97,13 +99,13 @@ public class PageFetcher extends CrawlerConfiguable{
             if (crawlerConfig.getProxyUsername() != null) {
                 BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
                 credentialsProvider.setCredentials(
-                        new AuthScope(crawlerConfig.getProxyHost() , crawlerConfig.getProxyPort()) ,
-                        new UsernamePasswordCredentials(crawlerConfig.getProxyUsername() , crawlerConfig.getProxyPassword()));
+                        new AuthScope(crawlerConfig.getProxyHost(), crawlerConfig.getProxyPort()),
+                        new UsernamePasswordCredentials(crawlerConfig.getProxyUsername(), crawlerConfig.getProxyPassword()));
                 clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
             HttpHost proxy = new HttpHost(crawlerConfig.getProxyHost(), crawlerConfig.getProxyPort());
             clientBuilder.setProxy(proxy);
-            logger.debug("Working through Proxy : {}" , proxy.getHostName());
+            logger.debug("Working through Proxy : {}", proxy.getHostName());
         }
 
         httpClient = clientBuilder.build();
@@ -134,18 +136,18 @@ public class PageFetcher extends CrawlerConfiguable{
             }
         };
 
-        sc.init(null, new TrustManager[] { trustManager }, null);
+        sc.init(null, new TrustManager[]{trustManager}, null);
         return sc;
     }
 
     /**
-     *
      * @param crawlerRequest
      * @return
      * @throws InterruptedException
      * @throws IOException
      */
     public FetchResult fetchPage(CrawlerRequest crawlerRequest) throws InterruptedException, IOException, PageSizeOverException {
+        logger.info("fetching url : {}", crawlerRequest.getUrl());
         FetchResult fetchResult = new FetchResult();
         String toFetchURL = crawlerRequest.getUrl();
         fetchResult.setFetchUrl(toFetchURL);
@@ -156,14 +158,21 @@ public class PageFetcher extends CrawlerConfiguable{
             try {
                 lock.lock();
                 long now = System.currentTimeMillis();
-                if( (now - lastFetchTime) < crawlerConfig.getFetchTimeDelay()){
+                if ((now - lastFetchTime) < crawlerConfig.getFetchTimeDelay()) {
                     Thread.sleep(crawlerConfig.getFetchTimeDelay() - (now - lastFetchTime));
                 }
                 lastFetchTime = System.currentTimeMillis();
-            }finally {
+            } finally {
                 lock.unlock();
             }
-            CloseableHttpResponse response = httpClient.execute(request);
+            CloseableHttpResponse response = null;
+            try {
+                response = httpClient.execute(request);
+            } catch (IllegalStateException e) {
+                logger.error(e.getMessage());
+                return null;
+            }
+
             fetchResult.setEntity(response.getEntity());
             fetchResult.setResponseHeaders(response.getAllHeaders());
 
@@ -177,10 +186,10 @@ public class PageFetcher extends CrawlerConfiguable{
                     statusCode == HttpStatus.SC_TEMPORARY_REDIRECT || statusCode == 308) {
                 Header header = response.getFirstHeader("Location");
                 if (header != null) {
-                    String movedToUrl = UrlUtils.canonicalizeUrl(header.getValue(), toFetchURL);
+                    String movedToUrl = NetUtils.canonicalizeURL(header.getValue(), toFetchURL);
                     fetchResult.setMoveToUrl(movedToUrl);
-                }else {
-                    logger.warn("Unexpected error, URL: {} is redirected to NOTHING", crawlerRequest.getUrl());
+                } else {
+                    logger.warn("unexpected error, url: {} is redirected to nothing", crawlerRequest.getUrl());
                     return null;
                 }
             } else if (statusCode >= 200 && statusCode <= 299) {
@@ -202,7 +211,7 @@ public class PageFetcher extends CrawlerConfiguable{
                 }
             }
             return fetchResult;
-        }finally {
+        } finally {
             if (fetchResult.getEntity() == null && request != null) {
                 request.abort();
             }
@@ -211,14 +220,13 @@ public class PageFetcher extends CrawlerConfiguable{
 
 
     /**
-     *
      * @param fetchResult
      * @return
      */
-    public Page loadPage(FetchResult fetchResult , CrawlerRequest request) throws ContentFetchException {
+    public Page loadPage(FetchResult fetchResult, CrawlerRequest request) throws ContentFetchException {
         try {
             Page page = new Page(request);
-            if(fetchResult.getMoveToUrl() != null){
+            if (fetchResult.getMoveToUrl() != null) {
                 page.setRedirect(true);
                 CrawlerRequest redirectRequest = new CrawlerRequest(fetchResult.getMoveToUrl());
                 redirectRequest.setParentUrl(fetchResult.getMoveToUrl());
@@ -227,17 +235,17 @@ public class PageFetcher extends CrawlerConfiguable{
                 return page;
             }
             try {
-                page.load(fetchResult.getEntity() , crawlerConfig.getMaxDownloadSize());
+                page.load(fetchResult.getEntity(), crawlerConfig.getMaxDownloadSize());
                 if (page.isTruncated()) {
                     logger.warn("Warning: unknown page size exceeded max-download-size, truncated to: " + "({}), at URL: {}", crawlerConfig.getMaxDownloadSize(), request.getUrl());
                 }
             } catch (Exception e) {
-                logger.info("Exception while fetching content for: {} [{}]", request.getUrl(), e.getMessage());
+                logger.error("exception while fetching content for: {} [{}]", request.getUrl(), e.getMessage());
                 throw new ContentFetchException(e);
             }
             return page;
-        }finally {
-            if(fetchResult != null){
+        } finally {
+            if (fetchResult != null) {
                 fetchResult.discardContent();
             }
         }
@@ -247,14 +255,17 @@ public class PageFetcher extends CrawlerConfiguable{
     /**
      *
      */
-    public void shutDown(){
+    public void shutDown() {
         try {
             lock.lock();
+            httpClient.close();
             if (connectionMonitorThread != null) {
-                connectionManager.shutdown();
+                //connectionManager.shutdown();
                 connectionMonitorThread.shutdown();
             }
-        }finally {
+        } catch (IOException e) {
+            logger.error("error occurred while shutdown httpclient", e);
+        } finally {
             lock.unlock();
         }
     }

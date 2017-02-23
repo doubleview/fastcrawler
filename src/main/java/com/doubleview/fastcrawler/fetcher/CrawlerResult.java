@@ -5,7 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- *
+ * result object the page
+ *@author doubleview
  */
 public class CrawlerResult {
 

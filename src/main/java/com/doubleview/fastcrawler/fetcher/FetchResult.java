@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * fetch result of the crawler request
  * @author doubleview
  */
 public class FetchResult {

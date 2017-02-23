@@ -4,14 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * the request object which represent the url request, the included url
+ * is a http url
+ *  @author doubleview
  */
 public class CrawlerRequest {
-
-
-    public static final String CYCLE_TRIED_TIMES = "cycle_tried_times";
-    public static final String STATUS_CODE = "statusCode";
-    public static final String PROXY = "proxy";
 
     private String url;
 
@@ -28,6 +25,8 @@ public class CrawlerRequest {
     private int priority;
 
     private Map<String , Object> configInfo;
+
+    public static final String CYCLE_TRIED_TIMES = "cycle_tried_times";
 
     public CrawlerRequest(String url) {
         setURL(url);

@@ -1,15 +1,11 @@
-package com.doubleview.fastcrawler.dispatch;
+package com.doubleview.fastcrawler.dispatcher;
 
 import com.doubleview.fastcrawler.CrawlerRequest;
 
 /**
- * PageDispatcher is the part of url management.<br>
- * You can implement interface PageDispatcher to do:
- * manage urls to fetch
- * remove duplicate urls
- *
+ * PageDispatcher object store the all the crawler request and manage the
+ * request dispatcher
  * @author doubleview
- *
  */
 public interface PageDispatcher {
 
@@ -20,8 +16,7 @@ public interface PageDispatcher {
      void push(CrawlerRequest request);
 
     /**
-     * get an url to crawl
-     *
+     * get an url to crawler
      * @return the url to crawl
      */
      CrawlerRequest poll();

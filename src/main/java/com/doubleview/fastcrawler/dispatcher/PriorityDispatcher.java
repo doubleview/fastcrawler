@@ -1,4 +1,4 @@
-package com.doubleview.fastcrawler.dispatch;
+package com.doubleview.fastcrawler.dispatcher;
 
 import com.doubleview.fastcrawler.CrawlerRequest;
 import org.apache.http.annotation.ThreadSafe;
@@ -9,8 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
- * Priority scheduler. CrawlerRequest with higher priority will poll earlier. <br>
- *
+ * Priority dispatcher
  * @author doubleview
  */
 @ThreadSafe
@@ -65,6 +64,6 @@ public class PriorityDispatcher extends AbstractPageDispather {
 
     @Override
     public int getTotalRequestsCount() {
-        return getDuplicateRemover().getTotalRequestsCount();
+        return getDuplicateStrategy().getSize();
     }
 }

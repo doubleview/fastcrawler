@@ -16,7 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * This class contains the data for a fetched and parsed page.
  *
+ * @author doubleview
  */
 public class Page {
 
@@ -42,6 +44,8 @@ public class Page {
 
     protected List<CrawlerRequest> followRequest;
 
+    protected List<CrawlerRequest> followBinaryRequest;
+
     protected TYPE type;
 
     protected BinaryData binaryData;
@@ -56,7 +60,7 @@ public class Page {
         HTML,
         PLAINTEXT,
         JSON,
-        BINARY
+        BINARY,
     }
 
 
@@ -70,8 +74,7 @@ public class Page {
 
 
     /**
-     * Loads the content of this page from a fetched HttpEntity.
-     *
+     * load the content of this page from a fetched HttpEntity.
      * @param entity HttpEntity
      * @param maxBytes The maximum number of bytes to read
      * @throws Exception when load fails
@@ -91,34 +94,31 @@ public class Page {
         Charset charset = ContentType.getOrDefault(entity).getCharset();
         if (charset != null) {
             contentCharset = charset.displayName();
+        }else {
+            contentCharset = Charset.defaultCharset().displayName();
         }
 
         contentData = toByteArray(entity, maxBytes);
     }
 
     /**
-     * Read contents from an entity, with a specified maximum. This is a replacement of
-     * EntityUtils.toByteArray because that function does not impose a maximum size.
-     *
+     * read contents from an entity, with a specified maximum.
      * @param entity The entity from which to read
      * @param maxBytes The maximum number of bytes to read
      * @return A byte array containing maxBytes or fewer bytes read from the entity
      *
-     * @throws IOException Thrown when reading fails for any reason
+     * @throws IOException thrown when reading fails for any reason
      */
     protected byte[] toByteArray(HttpEntity entity, int maxBytes) throws IOException {
         if (entity == null) {
             return new byte[0];
         }
-
         InputStream is = entity.getContent();
         int size = (int) entity.getContentLength();
         if (size <= 0 || size > maxBytes) {
             size = maxBytes;
         }
-
         int actualSize = 0;
-
         byte[] buf = new byte[size];
         while (actualSize < size) {
             int remain = size - actualSize;
@@ -131,19 +131,15 @@ public class Page {
             actualSize += readBytes;
         }
 
-        // Poll to see if there are more bytes to read. If there are,
-        // the content has been truncated
         int ch = is.read();
         if (ch >= 0) {
             truncated = true;
         }
 
-        // If the actual size matches the size of the buffer, do not copy it
         if (actualSize == buf.length) {
             return buf;
         }
 
-        // Return the subset of the byte buffer that was used
         return Arrays.copyOfRange(buf, 0, actualSize);
     }
 
@@ -222,6 +218,14 @@ public class Page {
 
     public void setFollowRequest(List<CrawlerRequest> followRequest) {
         this.followRequest = followRequest;
+    }
+
+    public List<CrawlerRequest> getFollowBinaryRequest() {
+        return followBinaryRequest;
+    }
+
+    public void setFollowBinaryRequest(List<CrawlerRequest> followBinaryRequest) {
+        this.followBinaryRequest = followBinaryRequest;
     }
 
     public boolean isTruncated() {

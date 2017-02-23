@@ -1,4 +1,4 @@
-package com.doubleview.fastcrawler.dispatch;
+package com.doubleview.fastcrawler.dispatcher;
 
 import com.doubleview.fastcrawler.CrawlerRequest;
 import org.apache.http.annotation.ThreadSafe;
@@ -8,11 +8,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
- * Basic PageDispatcher implementation.<br>
- * Store urls to fetch in LinkedBlockingQueue and remove duplicate urls by HashMap.
- *
+ * simple implementation the PageDispatcher which uses the LinkedBlockingQueue
  * @author doubleview
- * @since 0.1.0
+ *
  */
 @ThreadSafe
 public class SimpleDispatcher extends AbstractPageDispather {
@@ -36,6 +34,6 @@ public class SimpleDispatcher extends AbstractPageDispather {
 
     @Override
     public int getTotalRequestsCount() {
-        return getDuplicateRemover().getTotalRequestsCount();
+        return getDuplicateStrategy().getSize();
     }
 }

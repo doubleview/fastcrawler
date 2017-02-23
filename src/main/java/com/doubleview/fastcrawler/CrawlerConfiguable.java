@@ -1,8 +1,7 @@
 package com.doubleview.fastcrawler;
 
 /**
- * CrawlerConiguable
- *
+ * every class of fastcrawler extend this class to make them configurable.
  * @author doubleview
  */
 public abstract  class CrawlerConfiguable {
